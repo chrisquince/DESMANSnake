@@ -25,23 +25,23 @@ checkpoint Filter_Variant:
     input:
         "Samples_files/{group}/{bin}/count.csv"
     output :
-        expand("desman/{{group}}/{{Bin}}/freqs_{output_file_type}",output_file_type = ["sel_var.csv", "p_df.csv", "q_df.csv", "r_df.csv", "tran_df.csv", "log.txt"])
-    params : "desman/{group}/{Bin}/freqs_"
+        expand("desman/{{group}}/{{bin}}/freqs_{output_file_type}",output_file_type = ["sel_var.csv", "p_df.csv", "q_df.csv", "r_df.csv", "tran_df.csv", "log.txt"])
+    params : "desman/{group}/{bin}/freqs_"
     log:
-        "desman/{group}/Logs/{Bin}_Filter_variant.log"
+        "desman/{group}/Logs/{bin}_Filter_variant.log"
     shell:"""
         {SCRIPTS}/Variant_Filter.py {input} -o {params} -p -m {MIN_COV_DESMAN} 2>{log}
         """
 
 rule run_desman:
     input:
-        sel_var="desman/{group}/Bin_ini/{Bin}/freqs_sel_var.csv",
-        err="desman/{group}/Bin_ini/{Bin}/freqs_tran_df.csv"
+        sel_var="desman/{group}/{Bin}/freqs_sel_var.csv",
+        err="desman/{group}/{Bin}/freqs_tran_df.csv"
     output:
-        "desman/{group}/Bin_ini/{Bin}/Run_{g}_{r}/fit.txt"
-    params:"desman/{group}/Bin_ini/{Bin}/Run_{g}_{r}"
+        "desman/{group}/{Bin}/Run_{g}_{r}/fit.txt"
+    params:"desman/{group}/{Bin}/Run_{g}_{r}"
     log:
-        "desman/{group}/Bin_ini/Logs/Run_{g}_{r}/{Bin}_{g}_{r}.log"
+        "desman/{group}/Logs/Run_{g}_{r}/{Bin}_{g}_{r}.log"
     shell:"""
       desman {input.sel_var} -e {input.err} -o {params} -m {MIN_COV_DESMAN} -i 100 -g {wildcards.g} -s {wildcards.r} &> {log}
       """
