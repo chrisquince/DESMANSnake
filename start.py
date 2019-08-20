@@ -96,8 +96,12 @@ with cd(exec_dir):
     call_snake.nb=0
     print("Step #1 - Mapping and COG calling")
     call_snake(["--snakefile", "Mapping.snake"])
-    print("Step #2 - Strain calling")
-   # call_snake(["--snakefile", "Desman.snake"])
+    
+    print("Step #2 - Annotation snake")
+    call_snake(["--snakefile", "Annotation.snake"])
+    
+    #print("Step #3 - Strain calling")
+    #call_snake(["--snakefile", "Desman.snake"])
    
 
 
