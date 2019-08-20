@@ -5,7 +5,8 @@ include: "Common.snake"
 print(",".join(GROUPS))
 
 rule all : 
-    input: expand("desman/{groups}/{bins}/best_run.txt",groups=GROUPS,bins=BINS)
+    input: expand("desman/{group}/{bins}/desman_analysis_done",bins=LIST_INI_BINS,group=GROUPS)
+    
 
 rule extract_counts:
     input:
@@ -46,6 +47,18 @@ rule run_desman:
       desman {input.sel_var} -e {input.err} -o {params} -m {MIN_COV_DESMAN} -i 100 -g {wildcards.g} -s {wildcards.r} &> {log}
       """
 
+def do_we_need_to_run_desman(wildcards) :
+  freq_sel_var_file=checkpoints.Filter_Variant.get(group=wildcards.group,Bin=wildcards.Bin).output[0]
+  nb_line=len([line for line in open(freq_sel_var_file)])
+  if nb_line>1 :
+    return "desman/" + wildcards.group +"/" + wildcards.Bin + "/best_run.txt"
+  else :
+    return freq_sel_var_file
+
+rule Is_Desman_done :
+  input : do_we_need_to_run_desman
+  output: touch("desman/{group}/Bin_ini/{Bin}/desman_analysis_done")
+  shell :"echo Analysis done > /dev/null"
 
 
 # TODO REplace all of that with some checkpoint rules
