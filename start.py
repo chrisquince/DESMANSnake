@@ -97,7 +97,7 @@ with cd(exec_dir):
     print("Step #1 - Mapping and COG calling")
     call_snake(["--snakefile", "Mapping.snake"])
     print("Step #2 - Strain calling")
-    call_snake(["--snakefile", "Desman.snake"])
+   # call_snake(["--snakefile", "Desman.snake"])
    
 
 
