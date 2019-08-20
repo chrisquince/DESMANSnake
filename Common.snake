@@ -21,7 +21,7 @@ DESMAN_REPEAT = config["desman"]["nb_repeat"]
 MIN_COV_DESMAN = config["desman"]["min_cov"]
 LIST_COGS=list(map(str.rstrip,open(SCG_DATA+"/scg_cogs_min0.97_max1.03_unique_genera.txt").readlines()))
 SCRIPTS = config["scripts"]
-
+DSCRIPTS = config["desman"]["dscripts"]
 #Autodetect samples and their reads
 #Check that sample names are consecutive and all are presented
 

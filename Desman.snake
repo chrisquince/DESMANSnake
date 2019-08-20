@@ -18,7 +18,7 @@ rule extract_counts:
     log:
         "Samples_files/{group}/{bin}/extract_counts.log"
     shell:"""
-    python {SCRIPTS}/ExtractCountFreqGenes.py {input.SCG_bedlike} {params.input_dir} --output_file {output} &>> {log}
+    python {DSCRIPTS}/ExtractCountFreqGenes.py {input.SCG_bedlike} {params.input_dir} --output_file {output} &>> {log}
         """
 
 checkpoint Filter_Variant:
@@ -30,7 +30,7 @@ checkpoint Filter_Variant:
     log:
         "desman/{group}/Logs/{bin}_Filter_variant.log"
     shell:"""
-        {SCRIPTS}/Variant_Filter.py {input} -o {params} -p -m {MIN_COV_DESMAN} 2>{log}
+        Variant_Filter.py {input} -o {params} -p -m {MIN_COV_DESMAN} 2>{log}
         """
 
 rule run_desman:
@@ -62,7 +62,7 @@ rule Desman_plot:
     input: deviance_file="{path}/Deviance.csv",
     output: "{path}/Deviance.pdf"
     shell : """
-        {SCRIPTS}/PlotDev.R -l {wildcards.path}/Deviance.csv -o {output} 2> /dev/null
+        {DSCRIPTS}/PlotDev.R -l {wildcards.path}/Deviance.csv -o {output} 2> /dev/null
     """
 
 rule Haplo_seqs:
@@ -70,7 +70,7 @@ rule Haplo_seqs:
     output: "desman/{group}/{Bin}/best_run.txt"
     params: "desman/{group}/{Bin}"
     shell : """
-        python {SCRIPTS}/resolvenhap.py {params}/Run > {params}/best_run.txt
+        python {DSCRIPTS}/resolvenhap.py {params}/Run > {params}/best_run.txt
         
         cut -d"," -f 1 < {params}/freqs_sel_var.csv | sort | uniq | sed '1d' > {params}/coregenes.txt
 
@@ -78,7 +78,7 @@ rule Haplo_seqs:
             mkdir {params}/haplotype_seqs
         fi
         
-        python {SCRIPTS}/GetVariantsCore.py profile/scaffolds/{wildcards.group}.fasta binning/{wildcards.group}/Bin_ini/{wildcards.Bin}/Samples_files/SCG_bed_like.tsv $(cut -d"," -f5 {params}/best_run.txt) {params}/coregenes.txt -o {params}/haplotype_seqs/
+        python {DSCRIPTS}/GetVariantsCore.py profile/scaffolds/{wildcards.group}.fasta binning/{wildcards.group}/Bin_ini/{wildcards.Bin}/Samples_files/SCG_bed_like.tsv $(cut -d"," -f5 {params}/best_run.txt) {params}/coregenes.txt -o {params}/haplotype_seqs/
     """
     
 

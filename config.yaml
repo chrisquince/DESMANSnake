@@ -7,6 +7,7 @@ groups: ['*'] # specify a group of samples to resolve strains from
 cog_database: /home/sebr/seb/Database/rpsblast_cog_db/Cog # COG database 
 # ---- Desman parameters ------
 desman:
+    dscripts: /mnt/gpfs/chris/repos/DESMAN/scripts
     execution: 1
     nb_haplotypes: 10
     nb_repeat: 5
