@@ -68,7 +68,7 @@ This Snakmake requires the following to be installed:
 wget https://desmantutorial.s3.climb.ac.uk/rpsblast_cog_db.tar.gz
 tar -xvzf rpsblast_cog_db.tar.gz
 ```
-Then set the location as cog_database in config.yaml.
+Then set the location as ***cog_database*** in config.yaml.
 
 
 ## Structuring input
@@ -98,7 +98,7 @@ Where n is any integer and within that there is a single fasta of contigs named:
 Bin_n.fasta
 
 
-##Example Folder
+## Example Folder
 
 An example data folder is available here:
 
@@ -122,7 +122,7 @@ Optionally pass snakemake parameters e.g. '--dryrun'
 ## Config file
 
 ```
-# ------ Resssources ------ 
+# ------ Resources ------ 
 threads : 8 # single task nb threads
 # ------ Assembly parameters ------ 
 data: /pathTo/myData  # path to data folder
@@ -138,7 +138,7 @@ desman:
     min_cov: 1
 ```
 
-##Output
+## Output
 
 Desman results in desman folder
 
