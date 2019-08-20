@@ -2,9 +2,10 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 import glob,os
 include: "Common.snake"
 
+print(",".join(GROUPS))
 
 rule all : 
-    input: expand("Samples_files/{groups}/{bins}/count.csv",bins=BINS,group=GROUPS)
+    input: expand("Samples_files/{groups}/{bins}/count.csv",groups=GROUPS,bins=BINS)
   #input: expand("desman/{group}/{bins}/desman_analysis_done",bins=BINS,group=GROUPS)
   # input: expand("{bin_path}/contigs.fa",bin_path=LIST_BINPATHS)
   # input: expand("annotation/{group}/{group}_SCG.bed",group=GROUPS)
@@ -31,7 +32,7 @@ rule extract_counts:
     output:
         "Samples_files/{group}/{bin}/count.csv"
     params:
-        input_dir = "{Samples_files/{group}/{bin}"
+        input_dir = "Samples_files/{group}/{bin}"
     log:
         "Samples_files/{group}/{bin}/extract_counts.log"
     shell:"""
