@@ -1,8 +1,5 @@
 # DESMANSnake
 
-## Overview
-
-STRONG resolves strain on assembly graphs by resolving variants on core COGs using co-occurrence across multiple samples.
 
 ## Installation
 
