@@ -1,4 +1,4 @@
-# STRONG - Strain Resolution ON Graphs
+# DESMANSnake
 
 ## Overview
 
