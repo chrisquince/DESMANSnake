@@ -1,0 +1,6 @@
+include: "Common.snake"
+
+BINS=[path.split('/')[1] for path in  glob.glob(IN + "binning/Bin_*/Bin_*fasta")]
+
+rule all : 
+  input: expand("Map/{group}/{bins}/{sample}.sorted.bam",bins=BINS,sample=SAMPLES)

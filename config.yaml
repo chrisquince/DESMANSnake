@@ -1,0 +1,14 @@
+# ------ Resssources ------ 
+threads : 8 # single task nb threads
+# ------ Assembly parameters ------ 
+data: /mnt/gpfs/Hackathon/Test  # path to data folder
+mags: /mnt/gpfs/Hackathon/MAGs  # path to MAGs folder
+# ---- Annotation database -----
+cog_database: /home/sebr/seb/Database/rpsblast_cog_db/Cog # COG database 
+# ---- Desman parameters ------
+desman:
+    execution: 1
+    nb_haplotypes: 10
+    nb_repeat: 5
+    min_cov: 1
+
