@@ -1,0 +1,87 @@
+from Bio.SeqIO.FastaIO import SimpleFastaParser
+import glob,os
+
+include: "Common.snake"
+
+
+rule all : 
+  input: expand("annotation/{bins}/SCG_bed_like.tsv",bins=BINS)
+
+
+rule rpsblast:
+    input:"{filename}.faa"
+    output: "{filename}_Rpsblast_cogs.tsv"
+    log: "{filename}_Rpsblast.log"
+    shell: "rpsblast -outfmt '6 qseqid sseqid evalue pident length slen qlen' -evalue 0.00001 -query {input} -db {COG_DB} -out {output}"
+
+
+# select best hit and use criterion : min 5% coverage, min 1e-10 evalue
+rule parse_cogs_annotation:
+    input:
+        "{filename}_Rpsblast_cogs.tsv"    
+    output:
+        "{filename}_Cogs_filtered.tsv"
+    log: "{filename}_Cogs_filtered.log"
+    shell:
+        "{SCRIPTS}/Filter_Cogs.py {input} --cdd_cog_file {SCG_DATA}/cdd_to_cog.tsv  > {output} 2> {log}"
+
+# extract from the bed file all position of SCG 
+rule extract_SCG_sequences:
+    input:
+        annotation="{filename}_Cogs_filtered.tsv",
+        gff="{filename}.gff",
+        fna="{filename}.fna"
+    output:
+        "{filename}_SCG.fna"
+    shell:
+        "{SCRIPTS}/Extract_SCG.py {input.fna} {input.annotation} {SCG_DATA}/scg_cogs_min0.97_max1.03_unique_genera.txt {input.gff}>{output}"
+
+rule prodigal:
+    input:IN + "/binning/{bin}/{bin}.fasta"
+    output:
+        faa="annotation/{bin}/{bin}.faa",
+        fna="annotation/{bin}/{bin}.fna",
+        gff="annotation/{bin}/{bin}.gff"
+    log: 
+        "annotation/{bin}/prodigal.log" 
+    shell:
+        "prodigal -i {input} -a {output.faa} -d {output.fna} -f gff -p meta -o {output.gff} &> {log} "
+
+rule get_SCG_bed :
+  input:
+      gff="annotation/{bin}/{bin}.gff",
+      SCG_file="annotation/{bin}/{bin}_SCG.fna",
+  output: 
+      SCG_bed="annotation/{bin}/{bin}_SCG.bed",
+      all_bed="annotation/{bin}/{bin}.bed"
+  run:
+      os.system(SCRIPTS+"/Gff_to_bed.py "+input.gff)
+      Set_seq={name.split()[0] for name,seq in SimpleFastaParser(open(input.SCG_file))}
+      Handle_w=open(output.SCG_bed,'w')
+      for line in open(output.all_bed) :
+          if line.split()[3] in Set_seq :
+              Handle_w.write(line)
+      Handle_w.close()
+
+rule get_bed_like_file_for_ExtractCountFreqGenes :
+  input:
+      SCG_bed="annotation/{bin}/{bin}_SCG.bed",
+      Bin_SCG="annotation/{bin}/{bin}_SCG.fna"
+  output: 
+      bedlike="annotation/{bin}/SCG_bed_like.tsv"
+  run:
+    Dico_SCG={header.split()[0]:header.split() for header,seq in SimpleFastaParser(open(input.Bin_SCG))}
+  # NODE_11_length_160076_cov_189.092050_50 COG0552 strand=+
+    Handle=open(output.bedlike,"w")
+    for line in open(input.SCG_bed) :
+      contig,start,end,orf=line.rstrip().split("\t")
+      if orf in Dico_SCG :
+        cog,strand=Dico_SCG[orf][1:]
+        cog,strand=Dico_SCG[orf][1:]
+        strand=str((strand=="strand=+")*1-(strand=="strand=-")*1)
+        contig="_".join(orf.split("_")[:-1])
+        Handle.write(",".join([cog,contig,start,end,orf,strand])+"\n")  
+    Handle.close()
+
+
+
