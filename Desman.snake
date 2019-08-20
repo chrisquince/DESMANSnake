@@ -5,25 +5,7 @@ include: "Common.snake"
 print(",".join(GROUPS))
 
 rule all : 
-    input: expand("Samples_files/{groups}/{bins}/count.csv",groups=GROUPS,bins=BINS)
-  #input: expand("desman/{group}/{bins}/desman_analysis_done",bins=BINS,group=GROUPS)
-  # input: expand("{bin_path}/contigs.fa",bin_path=LIST_BINPATHS)
-  # input: expand("annotation/{group}/{group}_SCG.bed",group=GROUPS)
-  # input: expand("{bin_path}/selected_sites.tsv",bin_path=LIST_BINPATHS)
-  # input: expand("{bin_path}/{sample}.bam",bin_path=LIST_BINPATHS,sample=SAMPLES)
-  # input: expand("{bin_path}/{sample}.cnt",bin_path=LIST_BINPATHS,sample=SAMPLES)
-  # input: expand("{bin_path}/Desman/freqs_{pipeline}.csv",bin_path=LIST_BINPATHS,pipeline=["sel_var","sergey"])
-  # input: expand("{bin_path}/Samples_files/SCG_bed_like.tsv",bin_path=LIST_BINPATHS)
-  # input: expand("{bin}/contigs.fa",bin=LIST_BINPATHS)
-         # expand("{bin_path}/Desman/Deviance.pdf",bin_path=LIST_BINPATHS),
-         # expand("{bin_path}/Desman/haplotype_seqs/done",bin_path=LIST_BINPATHS)
-
-
-def bin_contigs_are_extracted(wildcards) :
-  meh=checkpoints.Get_Bins_contigs.get(group=wildcards.group)
-  output="binning/"+wildcards.group+"/Bin_ini/"+wildcards.bin+"/"+wildcards.bin+".fasta"
-  return output
-
+    input: expand("desman/{groups}/{bins}/best_run.txt",groups=GROUPS,bins=BINS)
 
 rule extract_counts:
     input:
@@ -41,12 +23,12 @@ rule extract_counts:
 
 checkpoint Filter_Variant:
     input:
-        "binning/{group}/Bin_ini/{Bin}/Samples_files/count.csv"
+        "Samples_files/{group}/{bin}/count.csv"
     output :
-        expand("desman/{{group}}/Bin_ini/{{Bin}}/freqs_{output_file_type}",output_file_type = ["sel_var.csv", "p_df.csv", "q_df.csv", "r_df.csv", "tran_df.csv", "log.txt"])
-    params : "desman/{group}/Bin_ini/{Bin}/freqs_"
+        expand("desman/{{group}}/{{Bin}}/freqs_{output_file_type}",output_file_type = ["sel_var.csv", "p_df.csv", "q_df.csv", "r_df.csv", "tran_df.csv", "log.txt"])
+    params : "desman/{group}/{Bin}/freqs_"
     log:
-        "desman/{group}/Bin_ini/Logs/{Bin}_Filter_variant.log"
+        "desman/{group}/Logs/{Bin}_Filter_variant.log"
     shell:"""
         {SCRIPTS}/Variant_Filter.py {input} -o {params} -p -m {MIN_COV_DESMAN} 2>{log}
         """
@@ -69,10 +51,10 @@ rule run_desman:
 # TODO REplace all of that with some checkpoint rules
 
 rule Desman_fit:
-    input: expand("desman/{{group}}/Bin_ini/{{Bin}}/Run_{g}_{r}/fit.txt",g=range(1,DESMAN_HAPLOTYPE_NB+1),r=range(DESMAN_REPEAT))
-    output: "desman/{group}/Bin_ini/{Bin}/Deviance.csv"
+    input: expand("desman/{{group}}/{{Bin}}/Run_{g}_{r}/fit.txt",g=range(1,DESMAN_HAPLOTYPE_NB+1),r=range(DESMAN_REPEAT))
+    output: "desman/{group}/{Bin}/Deviance.csv"
     shell : """
-        cat $( ls desman/{wildcards.group}/Bin_ini/{wildcards.Bin}/Run_*/fit.txt) | cut -d"," -f2- > {output}
+        cat $( ls desman/{wildcards.group}/{wildcards.Bin}/Run_*/fit.txt) | cut -d"," -f2- > {output}
         sed -i '1iH,G,LP,Dev' {output}
     """
 
@@ -84,9 +66,9 @@ rule Desman_plot:
     """
 
 rule Haplo_seqs:
-    input: deviance_file="desman/{group}/Bin_ini/{Bin}/Deviance.pdf",
-    output: "desman/{group}/Bin_ini/{Bin}/best_run.txt"
-    params: "desman/{group}/Bin_ini/{Bin}"
+    input: deviance_file="desman/{group}/{Bin}/Deviance.pdf",
+    output: "desman/{group}/{Bin}/best_run.txt"
+    params: "desman/{group}/{Bin}"
     shell : """
         python {SCRIPTS}/resolvenhap.py {params}/Run > {params}/best_run.txt
         
@@ -100,16 +82,4 @@ rule Haplo_seqs:
     """
     
 
-def do_we_need_to_run_desman(wildcards) :
-  freq_sel_var_file=checkpoints.Filter_Variant.get(group=wildcards.group,Bin=wildcards.Bin).output[0]
-  nb_line=len([line for line in open(freq_sel_var_file)])
-  if nb_line>1 :
-    return "desman/" + wildcards.group +"/Bin_ini/" + wildcards.Bin + "/best_run.txt"
-  else :
-    return freq_sel_var_file
-
-rule Is_Desman_done :
-  input : do_we_need_to_run_desman
-  output: touch("desman/{group}/Bin_ini/{Bin}/desman_analysis_done")
-  shell :"echo Analysis done > /dev/null"
 
