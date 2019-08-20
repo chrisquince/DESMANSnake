@@ -11,12 +11,12 @@ print(",".join(SAMPLES))
 print(",".join(GROUPS))
 
 rule all : 
-    input: expand("Samples_files/{group}/{bin}/{sample}.cnt.gz",bins=BINS,groups=GROUPS,samples=SAMPLES)
+    input: expand("Samples_files/{groups}/{bins}/{samples}.cnt.gz",bins=BINS,groups=GROUPS,samples=SAMPLES)
 
 rule bam_readcount:
     input:
         fasta = IN + "/binning/{bin}/{bin}.fasta",
-        fai = "Index/{bin}/{bin}.fasta.fai",
+        fai = IN + "/binning/{bin}/{bin}.fasta.fai",
         bam_file = "Map/{bin}/{group}/{sample}.sorted.bam",
         bed_file = "Index/{bin}/{bin}.bed"
     output: "Samples_files/{group}/{bin}/{sample}.cnt.gz"
@@ -36,7 +36,7 @@ rule index_fasta_files:
   input:
     fasta = IN + "/binning/{bin}/{bin}.fasta"
   output:
-    fai = "Index/{bin}/{bin}.fasta.fai"
+    fai = IN + "/binning/{bin}/{bin}.fasta.fasta.fai"
   shell: "samtools faidx {input.fasta}"
 
 rule bowtie_index:

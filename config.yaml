@@ -2,7 +2,7 @@
 threads : 8 # single task nb threads
 # ------ Assembly parameters ------ 
 data: /mnt/gpfs/Hackathon/Test  # path to data folder
-mags: /mnt/gpfs/Hackathon/MAGs  # path to MAGs folder
+groups: ['*'] # specify a group of samples to resolve strains from
 # ---- Annotation database -----
 cog_database: /home/sebr/seb/Database/rpsblast_cog_db/Cog # COG database 
 # ---- Desman parameters ------
