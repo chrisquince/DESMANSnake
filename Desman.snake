@@ -2,10 +2,9 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 import glob,os
 include: "Common.snake"
 
-print(",".join(GROUPS))
 
 rule all : 
-    input: expand("desman/{group}/{bins}/desman_analysis_done",bins=LIST_INI_BINS,group=GROUPS)
+    input: expand("desman/{group}/{bins}/desman_analysis_done",group=GROUPS,bins=BINS)
     
 
 rule extract_counts:
@@ -48,20 +47,18 @@ rule run_desman:
       """
 
 def do_we_need_to_run_desman(wildcards) :
-  freq_sel_var_file=checkpoints.Filter_Variant.get(group=wildcards.group,Bin=wildcards.Bin).output[0]
+  freq_sel_var_file=checkpoints.Filter_Variant.get(group=wildcards.group,bin=wildcards.bin).output[0]
   nb_line=len([line for line in open(freq_sel_var_file)])
   if nb_line>1 :
-    return "desman/" + wildcards.group +"/" + wildcards.Bin + "/best_run.txt"
+    return "desman/" + wildcards.group +"/" + wildcards.bin + "/best_run.txt"
   else :
     return freq_sel_var_file
 
 rule Is_Desman_done :
   input : do_we_need_to_run_desman
-  output: touch("desman/{group}/Bin_ini/{Bin}/desman_analysis_done")
+  output: touch("desman/{group}/{bin}/desman_analysis_done")
   shell :"echo Analysis done > /dev/null"
 
-
-# TODO REplace all of that with some checkpoint rules
 
 rule Desman_fit:
     input: expand("desman/{{group}}/{{Bin}}/Run_{g}_{r}/fit.txt",g=range(1,DESMAN_HAPLOTYPE_NB+1),r=range(DESMAN_REPEAT))
@@ -92,7 +89,7 @@ rule Haplo_seqs:
             mkdir {params}/haplotype_seqs
         fi
         
-        python {DSCRIPTS}/GetVariantsCore.py {input.bin_file} nnotation/{wildcards.bin}/SCG_bed_like.tsv $(cut -d"," -f5 {params}/best_run.txt) {params}/coregenes.txt -o {params}/haplotype_seqs/
+        python {DSCRIPTS}/GetVariantsCore.py {input.bin_file} annotation/{wildcards.bin}/SCG_bed_like.tsv $(cut -d"," -f5 {params}/best_run.txt) {params}/coregenes.txt -o {params}/haplotype_seqs/
     """
     
 
