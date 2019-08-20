@@ -11,8 +11,33 @@ print(",".join(SAMPLES))
 print(",".join(GROUPS))
 
 rule all : 
-    input: expand("Map/{bins}/{groups}/{samples}.sorted.bam",bins=BINS,groups=GROUPS,samples=SAMPLES)
+    input: expand("Samples_files/{group}/{bin}/{sample}.cnt.gz",bins=BINS,groups=GROUPS,samples=SAMPLES)
 
+rule bam_readcount:
+    input:
+        fasta = IN + "/binning/{bin}/{bin}.fasta",
+        fai = "Index/{bin}/{bin}.fasta.fai",
+        bam_file = "Map/{bin}/{group}/{sample}.sorted.bam",
+        bed_file = "Index/{bin}/{bin}.bed"
+    output: "Samples_files/{group}/{bin}/{sample}.cnt.gz"
+    log:
+        "Samples_files/{group}/{bin}/bam_readcount_{sample}.log"
+    shell:"""
+        samtools index {input.bam_file} {input.bam_file}.bai
+        bam-readcount -l {input.bed_file} -f {input.fasta} {input.bam_file} 2> {log} | gzip > {output}
+        """
+
+rule Get_Bins_contigs_bed :
+  input:  IN + "/binning/{bin}/{bin}.fasta"
+  output: bin_bed="Index/{bin}/{bin}.bed"
+  shell: "{SCRIPTS}/WriteBed.py {input} > {output}"
+
+rule index_fasta_files:
+  input:
+    fasta = IN + "/binning/{bin}/{bin}.fasta"
+  output:
+    fai = "Index/{bin}/{bin}.fasta.fai"
+  shell: "samtools faidx {input.fasta}"
 
 rule bowtie_index:
     input:   IN + "/binning/{ref}/{ref}.fasta"
