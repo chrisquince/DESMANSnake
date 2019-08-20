@@ -100,9 +100,8 @@ with cd(exec_dir):
     print("Step #2 - Annotation snake")
     call_snake(["--snakefile", "Annotation.snake"])
     
-    #print("Step #3 - Strain calling")
-    #call_snake(["--snakefile", "Desman.snake"])
+    print("Step #3 - Strain calling")
+    call_snake(["--snakefile", "Desman.snake"])
    
-
 
     

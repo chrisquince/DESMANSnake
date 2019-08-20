@@ -66,9 +66,10 @@ rule Desman_plot:
     """
 
 rule Haplo_seqs:
-    input: deviance_file="desman/{group}/{Bin}/Deviance.pdf",
-    output: "desman/{group}/{Bin}/best_run.txt"
-    params: "desman/{group}/{Bin}"
+    input: deviance_file="desman/{group}/{bin}/Deviance.pdf",
+           bin_file = IN + "/binning/{bin}/{bin}.fasta"      
+    output: "desman/{group}/{bin}/best_run.txt"
+    params: "desman/{group}/{bin}"
     shell : """
         python {DSCRIPTS}/resolvenhap.py {params}/Run > {params}/best_run.txt
         
@@ -78,7 +79,7 @@ rule Haplo_seqs:
             mkdir {params}/haplotype_seqs
         fi
         
-        python {DSCRIPTS}/GetVariantsCore.py profile/scaffolds/{wildcards.group}.fasta binning/{wildcards.group}/Bin_ini/{wildcards.Bin}/Samples_files/SCG_bed_like.tsv $(cut -d"," -f5 {params}/best_run.txt) {params}/coregenes.txt -o {params}/haplotype_seqs/
+        python {DSCRIPTS}/GetVariantsCore.py {input.bin_file} nnotation/{wildcards.bin}/SCG_bed_like.tsv $(cut -d"," -f5 {params}/best_run.txt) {params}/coregenes.txt -o {params}/haplotype_seqs/
     """
     
 
