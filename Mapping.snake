@@ -36,7 +36,7 @@ rule index_fasta_files:
   input:
     fasta = IN + "/binning/{bin}/{bin}.fasta"
   output:
-    fai = IN + "/binning/{bin}/{bin}.fasta.fasta.fai"
+    fai = IN + "/binning/{bin}/{bin}.fasta.fai"
   shell: "samtools faidx {input.fasta}"
 
 rule bowtie_index:

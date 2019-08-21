@@ -2,7 +2,6 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 import glob,os
 include: "Common.snake"
 
-
 rule all : 
     input: expand("desman/{group}/{bins}/desman_analysis_done",group=GROUPS,bins=BINS)
     
